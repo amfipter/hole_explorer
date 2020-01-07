@@ -5,7 +5,7 @@ import java.util.Date
 import data.{HoleData, StampInfo}
 
 class HoleDataBuilder {
-  var id: Int = null
+  var id: Int = Int.MinValue
   var startTime: Date = null
   var endTime: Date = null
   val parameters = new collection.mutable.ArrayBuffer[String]()
