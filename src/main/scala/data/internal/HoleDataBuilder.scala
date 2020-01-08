@@ -4,12 +4,21 @@ import java.util.Date
 
 import data.{HoleData, StampInfo}
 
+object HoleDataBuilder {
+  val EXCLUDED_PARAMETERS = collection.immutable.Set.newBuilder
+    .addOne("TimeTag")
+    .addOne("DepthTag")
+    .addOne("PenetrRate")
+    .result()
+}
+
 class HoleDataBuilder {
-  var id: Int = Int.MinValue
-  var startTime: Date = null
-  var endTime: Date = null
   val parameters = new collection.mutable.ArrayBuffer[String]()
-  val stamps = new collection.mutable.ArrayBuffer[StampInfo]()
+
+  private var id: Int = Int.MinValue
+  private var startTime: Option[Date] = Option.empty
+  private var endTime: Option[Date] = Option.empty
+  private val stamps = new collection.mutable.ArrayBuffer[StampInfo]()
 
   def create(): HoleData = {
     new HoleData(id, startTime, endTime, parameters.toSeq, stamps.toSeq)
@@ -20,15 +29,17 @@ class HoleDataBuilder {
   }
 
   def setStartTime(time: Date) = {
-    this.startTime = time
+    this.startTime = Option.apply(time)
   }
 
   def setEndTime(time: Date): Unit = {
-    this.endTime = time
+    this.endTime = Option.apply(time)
   }
 
   def addParameter(parameter: String): Unit = {
-    parameters += parameter
+    if(!HoleDataBuilder.EXCLUDED_PARAMETERS.contains(parameter)) {
+      parameters += parameter
+    }
   }
 
   def addStamp(stampInfo: StampInfo): Unit = {
