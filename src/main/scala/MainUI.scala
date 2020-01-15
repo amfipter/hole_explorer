@@ -1,13 +1,16 @@
 import java.io.File
 
 import data.HoleDataParser
-import scalafx.geometry.Insets
+import data.internal.ChartProvider
+import scalafx.geometry.{Insets, Side}
 import scalafx.scene.Scene
 import scalafx.scene.control.Button
 import scalafx.scene.paint.Color._
 import scalafx.scene.layout.{GridPane, HBox}
 import scalafx.stage.{FileChooser, Stage}
 import scalafx.Includes._
+import scalafx.collections.ObservableBuffer
+import scalafx.scene.chart.{NumberAxis, ScatterChart, XYChart}
 import scalafx.stage.FileChooser.ExtensionFilter
 
 import scala.xml.XML
@@ -27,8 +30,7 @@ class MainUI(private val stage: Stage) extends Scene {
   }
   var selectedFile: File = null
 
-  fill = White
-  content = new HBox {
+  val hbox = new HBox {
     padding = Insets(20)
     children = Seq(
       new Button {
@@ -41,9 +43,13 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
 
+  fill = White
+  content = hbox
+
   private def update(): Unit = {
     if(selectedFile != null) {
-      val data = new HoleDataParser(selectedFile)
+      val dataParser = new HoleDataParser(selectedFile)
+      hbox.children.add(ChartProvider.getChart(dataParser.parse()))
     }
   }
 }

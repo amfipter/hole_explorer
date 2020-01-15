@@ -23,7 +23,7 @@ class HoleDataParser(private val file: File) {
   val doc = XML.loadFile(file)
   val holeDataBuilder = new HoleDataBuilder
 
-  parseInternal()
+//  parseInternal()
 
   def parse(): HoleData = {
     parseInternal()

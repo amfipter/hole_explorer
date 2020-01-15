@@ -1,0 +1,5 @@
+/target/scala-2.13/
+/target/streams/
+/target/.history
+/.idea/
+/project/target/
