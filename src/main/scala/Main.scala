@@ -12,8 +12,8 @@ import scalafx.scene.shape.Rectangle
 object Main extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "Hole Explorer"
-    width = 600
-    height = 450
+    width = 1200
+    height = 800
     scene = new MainUI(stage)
   }
 }
