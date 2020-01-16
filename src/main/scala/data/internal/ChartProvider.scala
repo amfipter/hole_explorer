@@ -12,18 +12,18 @@ import scalafx.scene.control.Tooltip
 object ChartProvider {
   private val defaultWidth: Int = 1000
 
-  def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int]): Node = {
+  def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int], skipFirstValue: Boolean): Node = {
     val scales = computeScales(holeData, isAdditional)
     val chart = new LineChart(NumberAxis("Depth", scales._1, scales._2, scales._4), NumberAxis("Value", scales._1, scales._3, scales._4)) {
       title = getChartName(isAdditional)
       legendSide = Side.Right
       if(!isAdditional) {
         data = ObservableBuffer(
-          xySeries("Depth", holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq))
+          xySeries("Depth", holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq, skipFirstValue))
       }
       else {
         val parameters = holeData.stamps(0).additionParameters.keySet
-        val series = parameters.map(parameter => xySeries(parameter, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.additionParameters.get(parameter).get))))
+        val series = parameters.map(parameter => xySeries(parameter, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.additionParameters.get(parameter).get)), skipFirstValue))
         data = ObservableBuffer(
           series.toSeq
         )
@@ -65,9 +65,12 @@ object ChartProvider {
   }
 
   /** Create XYChart.Series from a sequence of number pairs. */
-  private def xySeries(name: String, data: Seq[(Double, Double)]) =
+  private def xySeries(name: String, data: Seq[(Double, Double)], skipFirstValue: Boolean) =
     XYChart.Series[Number, Number](
       name,
-      ObservableBuffer(data.map { case (x, y) => XYChart.Data[Number, Number](x, y) })
+      ObservableBuffer((skipFirstValue match {
+        case true => data.tail
+        case false => data
+      }).map { case (x, y) => XYChart.Data[Number, Number](x, y) })
     )
 }

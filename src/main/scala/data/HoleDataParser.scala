@@ -22,10 +22,22 @@ object HoleDataParser {
 class HoleDataParser(private val file: File) {
   val doc = XML.loadFile(file)
   val holeDataBuilder = new HoleDataBuilder
+  var data: Option[HoleData] = Option.empty
 
 //  parseInternal()
 
-  def parse(): HoleData = {
+  def getHoleData() :HoleData = {
+    data match {
+      case Some(data_) => data_
+      case None => {
+        val parseResult = parse()
+        data = Option.apply(parseResult)
+        parseResult
+      }
+    }
+  }
+
+  private def parse(): HoleData = {
     parseInternal()
     holeDataBuilder.create()
   }
