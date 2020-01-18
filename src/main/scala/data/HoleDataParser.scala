@@ -44,7 +44,7 @@ class HoleDataParser(private val file: File) {
 
   private def parseInternal(): Unit = {
     for(item <- doc) {
-      println(item.attributes)
+//      println(item.attributes)
       for(child <- item.child) {
         child.label match {
           case HoleDataParser.ID_TAG => parseId(child)
@@ -102,7 +102,7 @@ class HoleDataParser(private val file: File) {
             builder.setAdditionParameter(holeDataBuilder.parameters(i - dataAlign), values(i))
           }
 
-          println(values(0))
+//          println(values(0))
         }
         case _ => Nil
       }

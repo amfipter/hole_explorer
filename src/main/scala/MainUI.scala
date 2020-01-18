@@ -1,11 +1,11 @@
 import java.io.File
 
 import `export`.ChartExporter
-import data.{HoleData, HoleDataParser}
+import data.{HoleData, HoleDataParser, HolesData}
 import data.internal.ChartProvider
 import scalafx.geometry.{Insets, Side}
 import scalafx.scene.{Node, Scene}
-import scalafx.scene.control.{Alert, Button, CheckBox}
+import scalafx.scene.control.{Alert, Button, CheckBox, ComboBox, Label}
 import scalafx.scene.paint.Color._
 import scalafx.scene.layout.{Border, GridPane, HBox, Priority, VBox}
 import scalafx.stage.{FileChooser, Stage}
@@ -20,6 +20,8 @@ import scala.xml.XML
 object MainUI {
   val width = 1200
   val height = 800
+
+  private val NO_DATA_LABEL = new Label("NO DATA")
 }
 
 
@@ -27,8 +29,8 @@ class MainUI(private val stage: Stage) extends Scene {
   var charts: Option[Node] = Option.empty
   private var currentWidth = MainUI.width
   private var currentHeight = MainUI.height
-  private var lastHoleData: Option[HoleData] = Option.empty
   private var skipFirstValue = true
+  private val holesDataModel = new HolesData
 
   this.widthProperty().addListener{
     (value: ObservableValue[_ <: Number], oldVal: Number, newVal: Number) =>
@@ -54,12 +56,13 @@ class MainUI(private val stage: Stage) extends Scene {
       new ExtensionFilter("Jpeg", Seq("*.jpg"))
     )
   }
-  var selectedFile: File = null
 
   val selectFileButton = new Button {
     text = "Select file"
     onAction = handle {
-      selectedFile = fileChooser.showOpenDialog(stage)
+      resetControlsData()
+      val selectedFiles = fileChooser.showOpenMultipleDialog(stage)
+      selectedFiles.filter(file => file != null).foreach(file => holesDataModel.addXmlFile(file))
       fullUpdate()
     }
   }
@@ -67,7 +70,7 @@ class MainUI(private val stage: Stage) extends Scene {
   val exportButton = new Button {
     text = "Export"
     onAction = handle {
-      lastHoleData match {
+      holesDataModel.getLastHoleData() match {
         case Some(value) => {
           val file = fileCreator.showSaveDialog(stage)
           val exporter = new ChartExporter(value)
@@ -86,8 +89,33 @@ class MainUI(private val stage: Stage) extends Scene {
     selected = skipFirstValue
     onAction = handle {
       skipFirstValue = !skipFirstValue
-      fullUpdate()
+      redrawCharts()
     }
+  }
+
+  val chooseHoleId = new ComboBox[Int]() {
+    items = {
+      val options = new ObservableBuffer[Int]()
+      options.addAll(holesDataModel.getHolesIds())
+      options
+    }
+
+    onAction = handle {
+      val id = value.get()
+      holesDataModel.getHole(id)
+      redrawCharts()
+    }
+  }
+
+  val chooseHoleIdLabel = new Label("Hole ID:")
+
+  val chooseHoleIdVBox = new VBox {
+    padding = Insets(5, 5, 0, 0)
+
+    children = Seq(
+      chooseHoleIdLabel,
+      chooseHoleId
+    )
   }
 
   val controlBox = new VBox() {
@@ -96,7 +124,8 @@ class MainUI(private val stage: Stage) extends Scene {
     children = Seq(
       selectFileButton,
       exportButton,
-      skipFirstValueCheckbox
+      skipFirstValueCheckbox,
+      chooseHoleIdVBox
     )
   }
 
@@ -115,12 +144,18 @@ class MainUI(private val stage: Stage) extends Scene {
   fill = White
   content = hbox
 
-  private def redrawCharts() = {
+  private def redrawCharts(): Unit = {
     val vbox = new VBox() {
       padding = Insets(5)
       children = Seq(
-        ChartProvider.getChart(lastHoleData.get, false, Option.apply(calculateChartWidth()), skipFirstValue),
-        ChartProvider.getChart(lastHoleData.get, true, Option.apply(calculateChartWidth()), skipFirstValue)
+        holesDataModel.getLastHoleData() match {
+          case Some(value) => ChartProvider.getChart(value, false, Option.apply(calculateChartWidth()), skipFirstValue)
+          case None => new Label("")
+        },
+        holesDataModel.getLastHoleData() match {
+          case Some(value) => ChartProvider.getChart(value, true, Option.apply(calculateChartWidth()), skipFirstValue)
+          case None => new Label("")
+        }
       )
     }
     HBox.setHgrow(vbox, Priority.Always)
@@ -137,13 +172,15 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
+  private def resetControlsData(): Unit = {
+    holesDataModel.clear()
+  }
+
   private def fullUpdate(): Unit = {
-    if(selectedFile != null) {
-      val dataParser = new HoleDataParser(selectedFile)
-      val data = dataParser.getHoleData()
-      lastHoleData = Option.apply(data)
-      redrawCharts()
-    }
+    val options = new ObservableBuffer[Int]()
+    options.addAll(holesDataModel.getHolesIds())
+    chooseHoleId.setItems(options)
+    redrawCharts()
   }
 
   private def calculateChartWidth(): Int = {

@@ -35,7 +35,7 @@ object ChartProvider {
       Tooltip.install(node, new Tooltip("Depth: " + innerData.getXValue + "\n" + "Value: " + innerData.getYValue))
     }))
     chart.setPrefWidth(prefWidth.getOrElse(defaultWidth).toDouble)
-    println(prefWidth)
+//    println(prefWidth)
     chart.setCursor(Cursor.CROSSHAIR);
     chart
   }
