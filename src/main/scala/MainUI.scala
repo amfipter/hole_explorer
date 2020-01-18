@@ -85,7 +85,7 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   val skipFirstValueCheckbox = new CheckBox {
-    text = "Skip first value"
+    text = "Skip\nFirst\nValue"
     selected = skipFirstValue
     onAction = handle {
       skipFirstValue = !skipFirstValue
@@ -104,12 +104,13 @@ class MainUI(private val stage: Stage) extends Scene {
       val id = value.get()
       holesDataModel.getHole(id)
       redrawCharts()
+      updateControlLabels()
     }
   }
 
   val chooseHoleIdLabel = new Label("Hole ID:")
 
-  val chooseHoleIdVBox = new VBox {
+  val chooseHoleIdVBox = new VBox() {
     padding = Insets(5, 5, 0, 0)
 
     children = Seq(
@@ -118,14 +119,28 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
 
+  val infoLabel = new Label("Info:")
+
+  val veerIdLabel = new Label(getVeerIdLabelText)
+
+  val infoControl = new VBox() {
+    padding = Insets(5, 5, 0, 0)
+    children = Seq(
+      infoLabel,
+      veerIdLabel
+    )
+  }
+
   val controlBox = new VBox() {
     padding = Insets(5)
-    prefWidth = 100
+    spacing = 5
+    prefWidth = 120
     children = Seq(
       selectFileButton,
       exportButton,
       skipFirstValueCheckbox,
-      chooseHoleIdVBox
+      chooseHoleIdVBox,
+      infoControl
     )
   }
 
@@ -172,6 +187,10 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
+  private def updateControlLabels() = {
+    veerIdLabel.setText(getVeerIdLabelText)
+  }
+
   private def resetControlsData(): Unit = {
     holesDataModel.clear()
   }
@@ -181,9 +200,16 @@ class MainUI(private val stage: Stage) extends Scene {
     options.addAll(holesDataModel.getHolesIds())
     chooseHoleId.setItems(options)
     redrawCharts()
+    updateControlLabels()
   }
 
   private def calculateChartWidth(): Int = {
     currentWidth - controlBox.width.toInt - 20
   }
+
+  private def getVeerIdLabelText =
+    holesDataModel.getLastHoleData() match {
+      case Some(lastHoleData) => "Veer ID: " + lastHoleData.veerId
+      case None => "N/A"
+    }
 }

@@ -3,12 +3,13 @@ package data
 import java.io.File
 
 import data.internal.{HoleDataBuilder, StampInfoBuilder}
-import util.DataUtils
+import util.{Logger, Utils}
 
 import scala.xml.{Node, XML}
 
 object HoleDataParser {
   val ID_TAG = "ReportId"
+  val VEER_ID_TAG = "PlanIdRef"
   val START_LOG_TIME_TAG = "StartLogTime"
   val END_LOG_TIME_TAG = "EndLogTime"
   val DATA_TAG = "CompactMWDdata"
@@ -51,9 +52,17 @@ class HoleDataParser(private val file: File) {
           case HoleDataParser.START_LOG_TIME_TAG => parseStartTime(child)
           case HoleDataParser.END_LOG_TIME_TAG => parseEndTime(child)
           case HoleDataParser.DATA_TAG => parseData(child)
+          case HoleDataParser.VEER_ID_TAG => parseVeerId(child)
           case _ => Nil
         }
       }
+    }
+  }
+
+  private def parseVeerId(node: Node): Unit = {
+    Utils.convertVeerId(node.text) match {
+      case Some(value) => holeDataBuilder.setVeerId(value)
+      case None => Logger.log("Can't parse veer id: " + node.text)
     }
   }
 
@@ -62,11 +71,17 @@ class HoleDataParser(private val file: File) {
   }
 
   private def parseStartTime(node: Node): Unit = {
-    holeDataBuilder.setStartTime(DataUtils.convertData(node.text))
+    Utils.convertData(node.text) match {
+      case Some(value) => holeDataBuilder.setStartTime(value)
+      case None => Logger.log("Can't parse date: " + node.text)
+    }
   }
 
   private def parseEndTime(node: Node): Unit = {
-    holeDataBuilder.setEndTime(DataUtils.convertData(node.text))
+    Utils.convertData(node.text) match {
+      case Some(value) => holeDataBuilder.setEndTime(value)
+      case None => Logger.log("Can's parse date: " + node.text)
+    }
   }
 
   private def parseData(node: Node): Unit = {
@@ -91,7 +106,10 @@ class HoleDataParser(private val file: File) {
     val builder = new StampInfoBuilder
     for(child <- node.child) {
       child.label match {
-        case HoleDataParser.SAMPLE_DATE_TAG => builder.setTime(DataUtils.convertData(child.text))
+        case HoleDataParser.SAMPLE_DATE_TAG => Utils.convertData(child.text) match {
+          case Some(value) => builder.setTime(value)
+          case None => Logger.log("Can't parse date: " + child.text)
+        }
         case HoleDataParser.SAMPLE_VALUES_TAG => {
           val values = child.text.split(" ").map(string => string.toDouble)
           builder.setDepth(values(0))
