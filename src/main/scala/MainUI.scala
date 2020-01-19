@@ -1,7 +1,7 @@
 import java.io.File
 
 import `export`.ChartExporter
-import data.{HoleData, HoleDataParser, HolesData}
+import data.{HoleData, HoleDataParser, HolesData, UiSettings}
 import data.internal.ChartProvider
 import scalafx.geometry.{Insets, Side}
 import scalafx.scene.{Node, Scene}
@@ -29,8 +29,8 @@ class MainUI(private val stage: Stage) extends Scene {
   var charts: Option[Node] = Option.empty
   private var currentWidth = MainUI.width
   private var currentHeight = MainUI.height
-  private var skipFirstValue = true
   private val holesDataModel = new HolesData
+  private val settings = new UiSettings
 
   this.widthProperty().addListener{
     (value: ObservableValue[_ <: Number], oldVal: Number, newVal: Number) =>
@@ -53,7 +53,7 @@ class MainUI(private val stage: Stage) extends Scene {
   lazy val fileCreator = new FileChooser {
     title = "Export charts"
     extensionFilters.add(
-      new ExtensionFilter("Jpeg", Seq("*.jpg"))
+      new ExtensionFilter("png", Seq("*.png"))
     )
   }
 
@@ -61,9 +61,14 @@ class MainUI(private val stage: Stage) extends Scene {
     text = "Select file"
     onAction = handle {
       resetControlsData()
-      val selectedFiles = fileChooser.showOpenMultipleDialog(stage)
-      selectedFiles.filter(file => file != null).foreach(file => holesDataModel.addXmlFile(file))
-      fullUpdate()
+      val selectedFiles = Option.apply(fileChooser.showOpenMultipleDialog(stage))
+      selectedFiles match {
+        case Some(value) => {
+          value.filter(file => file != null).foreach(file => holesDataModel.addXmlFile(file))
+          fullUpdate()
+        }
+        case None => Nil
+      }
     }
   }
 
@@ -73,7 +78,7 @@ class MainUI(private val stage: Stage) extends Scene {
       holesDataModel.getLastHoleData() match {
         case Some(value) => {
           val file = fileCreator.showSaveDialog(stage)
-          val exporter = new ChartExporter(value)
+          val exporter = new ChartExporter(value, settings)
           exporter.`export`(file)
         }
         case None => {
@@ -86,9 +91,9 @@ class MainUI(private val stage: Stage) extends Scene {
 
   val skipFirstValueCheckbox = new CheckBox {
     text = "Skip\nFirst\nValue"
-    selected = skipFirstValue
+    selected = settings.skipFirstValue
     onAction = handle {
-      skipFirstValue = !skipFirstValue
+      settings.skipFirstValue = !settings.skipFirstValue
       redrawCharts()
     }
   }
@@ -164,11 +169,11 @@ class MainUI(private val stage: Stage) extends Scene {
       padding = Insets(5)
       children = Seq(
         holesDataModel.getLastHoleData() match {
-          case Some(value) => ChartProvider.getChart(value, false, Option.apply(calculateChartWidth()), skipFirstValue)
+          case Some(value) => ChartProvider.getChart(value, false, Option.apply(calculateChartWidth()), settings.skipFirstValue)
           case None => new Label("")
         },
         holesDataModel.getLastHoleData() match {
-          case Some(value) => ChartProvider.getChart(value, true, Option.apply(calculateChartWidth()), skipFirstValue)
+          case Some(value) => ChartProvider.getChart(value, true, Option.apply(calculateChartWidth()), settings.skipFirstValue)
           case None => new Label("")
         }
       )
