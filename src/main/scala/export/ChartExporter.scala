@@ -21,14 +21,14 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
 
   val pane = new StackPane()
   lazy val stage = new Stage()
-  lazy val scene = new Scene(pane, ChartExporter.SCREEN_SIZE.width, ChartExporter.SCREEN_SIZE.height)
+  lazy val scene = new Scene(pane, ChartExporter.SCREEN_SIZE.width, ChartExporter.SCREEN_SIZE.height * 0.8)
 
   stage.scene = scene
 //  stage.show()
   val node = redraw()
 
   def export(file_ :File): Unit = {
-    val image = new WritableImage(ChartExporter.SCREEN_SIZE.width.toInt, ChartExporter.SCREEN_SIZE.height.toInt)
+    val image = new WritableImage(ChartExporter.SCREEN_SIZE.width.toInt, (ChartExporter.SCREEN_SIZE.height * 0.8).toInt)
     Thread.sleep(1000)
     node.snapshot(null, image)
     //TODO handle exceptions

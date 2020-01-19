@@ -45,14 +45,17 @@ object ChartProvider {
       val start = 0
       val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.additionParameters.values.max).max.toInt + 1
-      val step = end.toDouble / holeData.stamps.size
+      val step_ = end.toDouble / holeData.stamps.size
+      val step = step_ - (step_ % 0.1)
+      println(step)
       (start, end, maxValue, step / 2)
     }
     else {
       val start = 0
       val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.penetrRate).max.toInt + 1
-      val step = end.toDouble / holeData.stamps.size
+      val step_ = end.toDouble / holeData.stamps.size
+      val step = step_ - (step_ % 0.1)
       (start, end, maxValue, step / 2)
     }
   }
