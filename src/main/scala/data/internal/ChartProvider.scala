@@ -36,7 +36,8 @@ object ChartProvider {
     }))
     chart.setPrefWidth(prefWidth.getOrElse(defaultWidth).toDouble)
     chart.setCursor(Cursor.CROSSHAIR);
-//    chart.setHorizontalGridLinesVisible(!isAdditional)
+    chart.setLegendSide(Side.Bottom)
+    chart.setLegendVisible(isAdditional)
     chart
   }
 
