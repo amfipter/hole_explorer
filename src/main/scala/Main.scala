@@ -13,7 +13,7 @@ object Main extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "Hole Explorer"
     width = 1200
-    height = 800
+    height = 900
     scene = new MainUI(stage)
   }
 }

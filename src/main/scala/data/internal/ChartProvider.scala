@@ -14,7 +14,7 @@ object ChartProvider {
 
   def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int], skipFirstValue: Boolean): Node = {
     val scales = computeScales(holeData, isAdditional)
-    val chart = new LineChart(NumberAxis("Depth", scales._1, scales._2, scales._4), NumberAxis("Value", scales._1, scales._3, scales._4)) {
+    val chart = new LineChart(NumberAxis("Depth", scales._1, scales._2, scales._4), NumberAxis("Value", scales._1, scales._3, scales._5)) {
       title = getChartName(isAdditional)
       legendSide = Side.Right
       if(!isAdditional) {
@@ -35,28 +35,30 @@ object ChartProvider {
       Tooltip.install(node, new Tooltip("Depth: " + innerData.getXValue + "\n" + "Value: " + innerData.getYValue))
     }))
     chart.setPrefWidth(prefWidth.getOrElse(defaultWidth).toDouble)
-//    println(prefWidth)
     chart.setCursor(Cursor.CROSSHAIR);
+//    chart.setHorizontalGridLinesVisible(!isAdditional)
     chart
   }
 
-  private def computeScales(holeData: HoleData, isAdditional: Boolean): (Int, Int, Int, Double) = {
+  private def computeScales(holeData: HoleData, isAdditional: Boolean): (Int, Int, Int, Double, Double) = {
     if(isAdditional) {
       val start = 0
       val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.additionParameters.values.max).max.toInt + 1
-      val step_ = end.toDouble / holeData.stamps.size
+      val step_ = (end.toDouble / holeData.stamps.size)
       val step = step_ - (step_ % 0.1)
+      val stepx_ = maxValue.toDouble / 80
+      val stepx = stepx_ - (stepx_ %0.1)
       println(step)
-      (start, end, maxValue, step / 2)
+      (start, end, maxValue, stepx, maxValue.toDouble / 10)
     }
     else {
       val start = 0
       val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.penetrRate).max.toInt + 1
-      val step_ = end.toDouble / holeData.stamps.size
+      val step_ = (end.toDouble / holeData.stamps.size)
       val step = step_ - (step_ % 0.1)
-      (start, end, maxValue, step / 2)
+      (start, end, maxValue, step * 4, maxValue.toDouble / 10)
     }
   }
 

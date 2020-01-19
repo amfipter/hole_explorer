@@ -19,7 +19,7 @@ import scala.xml.XML
 
 object MainUI {
   val width = 1200
-  val height = 800
+  val height = 900
 
   private val NO_DATA_LABEL = new Label("NO DATA")
 }
