@@ -21,7 +21,13 @@ object MainUI {
   val width = 1200
   val height = 900
 
-  private val NO_DATA_LABEL = new Label("NO DATA")
+  private val EXPORT__EXPORT_CHARTS = "Export charts"
+  private val EXPORT__ERROR_MESSAGE = "Nothing to export"
+  private val IMPORT__DIALOG_NAME = "Select xml"
+  private val IMPORT__TYPE_DESCRIPTION = "xml description file"
+  private val SELECT_FILE = "Select file"
+  private val EXPORT = "Export"
+  private val HOLE_ID_SELECTOR = "Hole ID:"
 }
 
 
@@ -44,21 +50,21 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   lazy val fileChooser = new FileChooser {
-    title = "Select xml"
+    title = MainUI.IMPORT__DIALOG_NAME
     extensionFilters.add(
-      new ExtensionFilter("xml description file", Seq("*.xml"))
+      new ExtensionFilter(MainUI.IMPORT__TYPE_DESCRIPTION, Seq("*.xml"))
     )
   }
 
   lazy val fileCreator = new FileChooser {
-    title = "Export charts"
+    title = MainUI.EXPORT__EXPORT_CHARTS
     extensionFilters.add(
       new ExtensionFilter("png", Seq("*.png"))
     )
   }
 
   val selectFileButton = new Button {
-    text = "Select file"
+    text = MainUI.SELECT_FILE
     onAction = handle {
       resetControlsData()
       val selectedFiles = Option.apply(fileChooser.showOpenMultipleDialog(stage))
@@ -73,7 +79,7 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   val exportButton = new Button {
-    text = "Export"
+    text = MainUI.EXPORT
     onAction = handle {
       holesDataModel.getLastHoleData() match {
         case Some(value) => {
@@ -82,7 +88,7 @@ class MainUI(private val stage: Stage) extends Scene {
           exporter.`export`(file)
         }
         case None => {
-          val alert = new Alert(Alert.AlertType.Error, "Nothing to export")
+          val alert = new Alert(Alert.AlertType.Error, MainUI.EXPORT__ERROR_MESSAGE)
           alert.showAndWait()
         }
       }
@@ -114,7 +120,7 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
-  val chooseHoleIdLabel = new Label("Hole ID:")
+  val chooseHoleIdLabel = new Label(MainUI.HOLE_ID_SELECTOR)
 
   val chooseHoleIdVBox = new VBox() {
     padding = Insets(5, 5, 0, 0)
@@ -125,8 +131,10 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
 
+  //TODO Remove
   val infoLabel = new Label("Info:")
 
+  //TODO Remove
   val veerIdLabel = new Label(getVeerIdLabelText)
 
   //TODO Remove
@@ -195,7 +203,7 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   private def updateControlLabels() = {
-    veerIdLabel.setText(getVeerIdLabelText)
+//    veerIdLabel.setText(getVeerIdLabelText)
     holesDataModel.getLastHoleData() match {
       case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
       case None => Main.stage.setTitle(Main.DEFAULT_NAME)
@@ -218,9 +226,10 @@ class MainUI(private val stage: Stage) extends Scene {
     currentWidth - controlBox.width.toInt - 20
   }
 
-  private def getVeerIdLabelText =
-    holesDataModel.getLastHoleData() match {
-      case Some(lastHoleData) => "Veer ID: " + lastHoleData.veerId
-      case None => "N/A"
-    }
+  //TODO Remove
+//  private def getVeerIdLabelText =
+//    holesDataModel.getLastHoleData() match {
+//      case Some(lastHoleData) => "Veer ID: " + lastHoleData.veerId
+//      case None => "N/A"
+//    }
 }

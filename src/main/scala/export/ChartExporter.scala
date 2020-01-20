@@ -15,6 +15,9 @@ import scalafx.stage.{Screen, Stage}
 
 object ChartExporter {
   lazy private val SCREEN_SIZE = Screen.primary.bounds
+
+  private val VEER_ID = "Veer ID: "
+  private val HOLE_ID = "Hole ID: "
 }
 
 class ChartExporter(private val holeData: HoleData, private val settings: UiSettings) {
@@ -52,8 +55,8 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
       prefWidth = 120
       children = Seq(
         new Label("Info:"),
-        new Label("Veer ID: " + holeData.veerId),
-        new Label("Hole ID: " + holeData.id)
+        new Label(ChartExporter.VEER_ID + holeData.veerId),
+        new Label(ChartExporter.HOLE_ID + holeData.id)
       )
     }
 

@@ -12,14 +12,19 @@ import scalafx.scene.control.Tooltip
 object ChartProvider {
   private val defaultWidth: Int = 1000
 
+  private val DEPTH = "Depth"
+  private val VALUE = "Value"
+  private val ADDITIONAL_OPTIONS = "Additional options"
+  private val PENETRATION_RATE_CHART = "Penetration rate chart"
+
   def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int], skipFirstValue: Boolean): Node = {
     val scales = computeScales(holeData, isAdditional)
-    val chart = new LineChart(NumberAxis("Depth", scales._1, scales._2, scales._4), NumberAxis("Value", scales._1, scales._3, scales._5)) {
+    val chart = new LineChart(NumberAxis(DEPTH, scales._1, scales._2, scales._4), NumberAxis(VALUE, scales._1, scales._3, scales._5)) {
       title = getChartName(isAdditional)
       legendSide = Side.Right
       if(!isAdditional) {
         data = ObservableBuffer(
-          xySeries("Depth", holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq, skipFirstValue))
+          xySeries(DEPTH, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq, skipFirstValue))
       }
       else {
         val parameters = holeData.stamps(0).additionParameters.keySet
@@ -32,7 +37,7 @@ object ChartProvider {
     }
     chart.getData.forEach(data => data.getData.forEach(innerData => {
       val node = innerData.getNode
-      Tooltip.install(node, new Tooltip("Depth: " + innerData.getXValue + "\n" + "Value: " + innerData.getYValue))
+      Tooltip.install(node, new Tooltip(DEPTH + ": " + innerData.getXValue + "\n" + VALUE + ": " + innerData.getYValue))
     }))
     chart.setPrefWidth(prefWidth.getOrElse(defaultWidth).toDouble)
     chart.setCursor(Cursor.CROSSHAIR);
@@ -49,6 +54,7 @@ object ChartProvider {
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.additionParameters.values.max).max.toInt + 1
       val step_ = (end.toDouble / holeData.stamps.size)
       val step = step_ - (step_ % 0.1)
+      //TODO Remove
 //      val stepx_ = maxValue.toDouble / 80
 //      val stepx = stepx_ - (stepx_ %0.1)
       println(step)
@@ -56,6 +62,7 @@ object ChartProvider {
     }
     else {
       val start = 0
+      //TODO Remove
 //      val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.penetrRate).max.toInt + 1
       val step_ = (end.toDouble / holeData.stamps.size)
@@ -66,8 +73,8 @@ object ChartProvider {
 
   private def getChartName(isAdditional: Boolean): String = {
     isAdditional match {
-      case true => "Additional options"
-      case _ => "Penetration rate chart"
+      case true => ADDITIONAL_OPTIONS
+      case _ => PENETRATION_RATE_CHART
     }
   }
 
