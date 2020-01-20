@@ -26,6 +26,7 @@ object Utils {
     }
   }
 
+  //TODO remove
   def convertVeerId(representation: String) :Option[Int] = {
     val matcher = veerIdPattern.matcher(representation)
     if(matcher.matches()) {

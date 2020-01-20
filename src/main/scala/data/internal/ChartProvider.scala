@@ -42,24 +42,25 @@ object ChartProvider {
   }
 
   private def computeScales(holeData: HoleData, isAdditional: Boolean): (Int, Int, Int, Double, Double) = {
+    val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
+    val stepx = end.toDouble / 20
     if(isAdditional) {
       val start = 0
-      val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.additionParameters.values.max).max.toInt + 1
       val step_ = (end.toDouble / holeData.stamps.size)
       val step = step_ - (step_ % 0.1)
-      val stepx_ = maxValue.toDouble / 80
-      val stepx = stepx_ - (stepx_ %0.1)
+//      val stepx_ = maxValue.toDouble / 80
+//      val stepx = stepx_ - (stepx_ %0.1)
       println(step)
       (start, end, maxValue, stepx, maxValue.toDouble / 10)
     }
     else {
       val start = 0
-      val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
+//      val end = holeData.stamps.map(stampInfo => stampInfo.depth).max.toInt + 1
       val maxValue = holeData.stamps.map(stampInfo => stampInfo.penetrRate).max.toInt + 1
       val step_ = (end.toDouble / holeData.stamps.size)
       val step = step_ - (step_ % 0.1)
-      (start, end, maxValue, step * 4, maxValue.toDouble / 10)
+      (start, end, maxValue, stepx, maxValue.toDouble / 10)
     }
   }
 

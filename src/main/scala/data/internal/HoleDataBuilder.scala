@@ -16,7 +16,7 @@ class HoleDataBuilder {
   val parameters = new collection.mutable.ArrayBuffer[String]()
 
   private var id: Int = Int.MinValue
-  private var veerId: Int = Int.MinValue
+  private var veerId: String = ""
   private var startTime: Option[Date] = Option.empty
   private var endTime: Option[Date] = Option.empty
   private val stamps = new collection.mutable.ArrayBuffer[StampInfo]()
@@ -29,7 +29,7 @@ class HoleDataBuilder {
     this.id = id
   }
 
-  def setVeerId(id: Int): Unit = {
+  def setVeerId(id: String): Unit = {
     this.veerId = id
   }
 

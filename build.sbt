@@ -1,6 +1,6 @@
 name := "hole_explorer"
 
-version := "0.3"
+version := "0.4"
 
 scalaVersion := "2.13.1"
 

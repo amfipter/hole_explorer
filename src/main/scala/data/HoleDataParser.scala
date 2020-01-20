@@ -60,10 +60,12 @@ class HoleDataParser(private val file: File) {
   }
 
   private def parseVeerId(node: Node): Unit = {
-    Utils.convertVeerId(node.text) match {
-      case Some(value) => holeDataBuilder.setVeerId(value)
-      case None => Logger.log("Can't parse veer id: " + node.text)
-    }
+    //TODO Remove
+//    Utils.convertVeerId(node.text) match {
+//      case Some(value) => holeDataBuilder.setVeerId(value)
+//      case None => Logger.log("Can't parse veer id: " + node.text)
+//    }
+    holeDataBuilder.setVeerId(node.text)
   }
 
   private def parseId(node: Node): Unit = {

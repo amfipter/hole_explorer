@@ -89,6 +89,7 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
+  //TODO remove
   val skipFirstValueCheckbox = new CheckBox {
     text = "Skip\nFirst\nValue"
     selected = settings.skipFirstValue
@@ -128,6 +129,7 @@ class MainUI(private val stage: Stage) extends Scene {
 
   val veerIdLabel = new Label(getVeerIdLabelText)
 
+  //TODO Remove
   val infoControl = new VBox() {
     padding = Insets(5, 5, 0, 0)
     children = Seq(
@@ -143,9 +145,9 @@ class MainUI(private val stage: Stage) extends Scene {
     children = Seq(
       selectFileButton,
       exportButton,
-      skipFirstValueCheckbox,
-      chooseHoleIdVBox,
-      infoControl
+//      skipFirstValueCheckbox,
+      chooseHoleIdVBox
+//      infoControl
     )
   }
 
@@ -194,6 +196,10 @@ class MainUI(private val stage: Stage) extends Scene {
 
   private def updateControlLabels() = {
     veerIdLabel.setText(getVeerIdLabelText)
+    holesDataModel.getLastHoleData() match {
+      case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
+      case None => Main.stage.setTitle(Main.DEFAULT_NAME)
+    }
   }
 
   private def resetControlsData(): Unit = {
