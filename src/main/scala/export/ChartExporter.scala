@@ -5,6 +5,7 @@ import java.io.File
 import data.{HoleData, HolesData, UiSettings}
 import data.internal.ChartProvider
 import javax.imageio.ImageIO
+import localizer.Localizer
 import scalafx.embed.swing.SwingFXUtils
 import scalafx.geometry.Insets
 import scalafx.scene.{Node, Scene}
@@ -16,8 +17,8 @@ import scalafx.stage.{Screen, Stage}
 object ChartExporter {
   lazy private val SCREEN_SIZE = Screen.primary.bounds
 
-  private val VEER_ID = "Veer ID: "
-  private val HOLE_ID = "Hole ID: "
+  private val VEER_ID = Localizer.getTranslation("Veer ID: ")
+  private val HOLE_ID = Localizer.getTranslation("Hole ID: ")
 }
 
 class ChartExporter(private val holeData: HoleData, private val settings: UiSettings) {
@@ -51,11 +52,11 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
   def redraw(): Pane = {
     scene.getChildren.clear()
 
-    val info = new VBox() {
-      prefWidth = 120
+    val info = new HBox() {
+//      prefWidth = 120
       children = Seq(
-        new Label("Info:"),
-        new Label(ChartExporter.VEER_ID + holeData.veerId),
+//        new Label("Info:"),
+        new Label(ChartExporter.VEER_ID + holeData.veerId + "\t\t"),
         new Label(ChartExporter.HOLE_ID + holeData.id)
       )
     }
@@ -63,27 +64,28 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
     val charts = new VBox() {
       padding = Insets(5)
       children = Seq(
+        info,
         ChartProvider.getChart(holeData, false, Option.apply(calculateChartWidth()), settings.skipFirstValue),
         ChartProvider.getChart(holeData, true, Option.apply(calculateChartWidth()), settings.skipFirstValue)
       )
     }
 
-    val hbox = new HBox() {
-      padding = Insets(5)
-      fillHeight = true
-      children = Seq(
-        info,
-        charts
-      )
-    }
-    HBox.setHgrow(hbox, Priority.Always)
+//    val hbox = new HBox() {
+//      padding = Insets(5)
+//      fillHeight = true
+//      children = Seq(
+//        info,
+//        charts
+//      )
+//    }
+    HBox.setHgrow(info, Priority.Always)
 
-    scene.getChildren.add(hbox)
-    hbox
+    scene.getChildren.add(charts)
+    charts
   }
 
   private def calculateChartWidth(): Int = {
-    val width = ChartExporter.SCREEN_SIZE.width - 120 - 10
+    val width = ChartExporter.SCREEN_SIZE.width - 10
     width.toInt
   }
 }

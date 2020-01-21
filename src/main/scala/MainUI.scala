@@ -11,6 +11,7 @@ import scalafx.scene.layout.{Border, GridPane, HBox, Priority, VBox}
 import scalafx.stage.{FileChooser, Stage}
 import scalafx.Includes._
 import javafx.beans.value.ObservableValue
+import localizer.Localizer
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.chart.{NumberAxis, ScatterChart, XYChart}
 import scalafx.stage.FileChooser.ExtensionFilter
@@ -21,13 +22,13 @@ object MainUI {
   val width = 1200
   val height = 900
 
-  private val EXPORT__EXPORT_CHARTS = "Export charts"
-  private val EXPORT__ERROR_MESSAGE = "Nothing to export"
-  private val IMPORT__DIALOG_NAME = "Select xml"
-  private val IMPORT__TYPE_DESCRIPTION = "xml description file"
-  private val SELECT_FILE = "Select file"
-  private val EXPORT = "Export"
-  private val HOLE_ID_SELECTOR = "Hole ID:"
+  private val EXPORT__EXPORT_CHARTS = Localizer.getTranslation("Export charts")
+  private val EXPORT__ERROR_MESSAGE = Localizer.getTranslation("Nothing to export")
+  private val IMPORT__DIALOG_NAME = Localizer.getTranslation("Select xml")
+  private val IMPORT__TYPE_DESCRIPTION = Localizer.getTranslation("xml description file")
+  private val SELECT_FILE = Localizer.getTranslation("Select file")
+  private val EXPORT = Localizer.getTranslation("Export")
+  private val HOLE_ID_SELECTOR = Localizer.getTranslation("Hole ID: ")
 }
 
 
@@ -135,16 +136,16 @@ class MainUI(private val stage: Stage) extends Scene {
   val infoLabel = new Label("Info:")
 
   //TODO Remove
-  val veerIdLabel = new Label(getVeerIdLabelText)
+//  val veerIdLabel = new Label(getVeerIdLabelText)
 
   //TODO Remove
-  val infoControl = new VBox() {
-    padding = Insets(5, 5, 0, 0)
-    children = Seq(
-      infoLabel,
-      veerIdLabel
-    )
-  }
+//  val infoControl = new VBox() {
+//    padding = Insets(5, 5, 0, 0)
+//    children = Seq(
+//      infoLabel,
+//      veerIdLabel
+//    )
+//  }
 
   val controlBox = new VBox() {
     padding = Insets(5)
@@ -203,7 +204,6 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   private def updateControlLabels() = {
-//    veerIdLabel.setText(getVeerIdLabelText)
     holesDataModel.getLastHoleData() match {
       case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
       case None => Main.stage.setTitle(Main.DEFAULT_NAME)

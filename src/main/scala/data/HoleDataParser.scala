@@ -8,7 +8,7 @@ import util.{Logger, Utils}
 import scala.xml.{Node, XML}
 
 object HoleDataParser {
-  val ID_TAG = "ReportId"
+  val ID_TAG = "MWDholeId"
   val VEER_ID_TAG = "PlanIdRef"
   val START_LOG_TIME_TAG = "StartLogTime"
   val END_LOG_TIME_TAG = "EndLogTime"

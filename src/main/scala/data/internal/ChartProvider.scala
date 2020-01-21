@@ -3,6 +3,7 @@ package data.internal
 import java.nio.file.Path
 
 import data.HoleData
+import localizer.Localizer
 import scalafx.scene.{Cursor, Node}
 import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Side
@@ -12,10 +13,10 @@ import scalafx.scene.control.Tooltip
 object ChartProvider {
   private val defaultWidth: Int = 1000
 
-  private val DEPTH = "Depth"
-  private val VALUE = "Value"
-  private val ADDITIONAL_OPTIONS = "Additional options"
-  private val PENETRATION_RATE_CHART = "Penetration rate chart"
+  private val DEPTH = Localizer.getTranslation("Depth")
+  private val VALUE = Localizer.getTranslation("Value")
+  private val ADDITIONAL_OPTIONS = Localizer.getTranslation("Additional options")
+  private val PENETRATION_RATE_CHART = Localizer.getTranslation("Penetration rate chart")
 
   def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int], skipFirstValue: Boolean): Node = {
     val scales = computeScales(holeData, isAdditional)
@@ -28,7 +29,7 @@ object ChartProvider {
       }
       else {
         val parameters = holeData.stamps(0).additionParameters.keySet
-        val series = parameters.map(parameter => xySeries(parameter, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.additionParameters.get(parameter).get)), skipFirstValue))
+        val series = parameters.map(parameter => xySeries(Localizer.getTranslation(parameter), holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.additionParameters.get(parameter).get)), skipFirstValue))
         data = ObservableBuffer(
           series.toSeq
         )
