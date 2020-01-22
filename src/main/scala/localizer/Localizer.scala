@@ -19,6 +19,8 @@ object Localizer {
     .addOne("FlushPressure", "Давление промывки")
     .addOne("PenetrRate", "Скорость проходки")
     .addOne("DepthTag", "Отметка глубины")
+    .addOne("Separated charts", "Диаграмма скважины")
+    .addOne("Integrated chart", "Диаграмма веера")
     .result()
 
   def getTranslation(literal: String): String = {

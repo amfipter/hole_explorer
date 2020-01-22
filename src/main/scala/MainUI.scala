@@ -29,6 +29,8 @@ object MainUI {
   private val SELECT_FILE = Localizer.getTranslation("Select file")
   private val EXPORT = Localizer.getTranslation("Export")
   private val HOLE_ID_SELECTOR = Localizer.getTranslation("Hole ID: ")
+  private val CHART_SELECTOR__SEPARATE_VIEW = Localizer.getTranslation("Separated charts")
+  private val CHART_SELECTOR__INTEGRATED_VIEW = Localizer.getTranslation("Integrated chart")
 }
 
 
@@ -132,23 +134,8 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
 
-  //TODO Remove
-  val infoLabel = new Label("Info:")
-
-  //TODO Remove
-//  val veerIdLabel = new Label(getVeerIdLabelText)
-
-  //TODO Remove
-//  val infoControl = new VBox() {
-//    padding = Insets(5, 5, 0, 0)
-//    children = Seq(
-//      infoLabel,
-//      veerIdLabel
-//    )
-//  }
-
   val controlBox = new VBox() {
-    padding = Insets(5)
+//    padding = Insets(5)
     spacing = 5
     prefWidth = 120
     children = Seq(
@@ -160,45 +147,88 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
 
-  val hbox = new HBox {
+  val separatedChartsSelector = new Button {
+    text = MainUI.CHART_SELECTOR__SEPARATE_VIEW
+
+    onAction = handle {
+      if(settings.selectedChartType != UiSettings.SelectedChartType.SEPARATE) {
+        settings.selectedChartType = UiSettings.SelectedChartType.SEPARATE
+        redrawCharts()
+      }
+    }
+  }
+
+  val integratedChartsSelector = new Button {
+    text = MainUI.CHART_SELECTOR__INTEGRATED_VIEW
+
+    onAction = handle {
+      if(settings.selectedChartType != UiSettings.SelectedChartType.INTEGRATE) {
+        settings.selectedChartType = UiSettings.SelectedChartType.INTEGRATE
+        redrawCharts()
+      }
+    }
+  }
+
+  val chartSelectorSection = new HBox {
+    padding = Insets(0, 0, 0, 50)
+    spacing = 10
+    children = Seq(
+      separatedChartsSelector,
+      integratedChartsSelector
+    )
+  }
+
+  val chartAreaNode = new VBox {
+    children = Seq(
+      chartSelectorSection
+    )
+  }
+
+  val mainAreaNode = new HBox {
     padding = Insets(10)
     fillHeight = true
     children = Seq(
-      controlBox
+      controlBox,
+      chartAreaNode
     )
   }
-  HBox.setHgrow(hbox, Priority.Always)
+  HBox.setHgrow(mainAreaNode, Priority.Always)
 //  hbox.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
 //    + "-fx-border-width: 2;" + "-fx-border-insets: 5;"
 //    + "-fx-border-radius: 5;" + "-fx-border-color: blue;");
 
   fill = White
-  content = hbox
+  content = mainAreaNode
 
   private def redrawCharts(): Unit = {
-    val vbox = new VBox() {
-      padding = Insets(5)
-      children = Seq(
-        holesDataModel.getLastHoleData() match {
-          case Some(value) => ChartProvider.getChart(value, false, Option.apply(calculateChartWidth()), settings.skipFirstValue)
-          case None => new Label("")
-        },
-        holesDataModel.getLastHoleData() match {
-          case Some(value) => ChartProvider.getChart(value, true, Option.apply(calculateChartWidth()), settings.skipFirstValue)
-          case None => new Label("")
+    val chartNode = holesDataModel.getLastHoleData() match {
+      case Some(lastHoleData) => {
+        val chartProvider = new ChartProvider(lastHoleData, Option.apply(calculateChartWidth()))
+        new VBox() {
+          padding = Insets(5)
+          children = chartProvider.getChart(settings.selectedChartType)
         }
-      )
+      }
+        case None => {
+          new VBox {
+            padding = Insets(5)
+            children = Seq(
+              new Label("")
+            )
+          }
+        }
     }
-    HBox.setHgrow(vbox, Priority.Always)
+
+    HBox.setHgrow(chartNode, Priority.Always)
     charts match {
       case Some(node) => {
-        hbox.children.remove(node)
-        hbox.children.add(vbox)
-        charts = Option.apply(vbox)
+        chartAreaNode.children.remove(node)
+        chartAreaNode.children.add(chartNode)
+        charts = Option.apply(chartNode)
       }
       case _ => {
-        hbox.children.add(vbox)
-        charts = Option.apply(vbox)
+        chartAreaNode.children.add(chartNode)
+        charts = Option.apply(chartNode)
       }
     }
   }
@@ -225,11 +255,4 @@ class MainUI(private val stage: Stage) extends Scene {
   private def calculateChartWidth(): Int = {
     currentWidth - controlBox.width.toInt - 20
   }
-
-  //TODO Remove
-//  private def getVeerIdLabelText =
-//    holesDataModel.getLastHoleData() match {
-//      case Some(lastHoleData) => "Veer ID: " + lastHoleData.veerId
-//      case None => "N/A"
-//    }
 }

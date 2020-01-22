@@ -61,12 +61,16 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
       )
     }
 
-    val charts = new VBox() {
+    val chartProvider = new ChartProvider(holeData, Option.apply(calculateChartWidth()))
+    val chartsArea = new VBox() {
+      children = chartProvider.getChart(settings.selectedChartType)
+    }
+
+    val charts = new VBox {
       padding = Insets(5)
       children = Seq(
         info,
-        ChartProvider.getChart(holeData, false, Option.apply(calculateChartWidth()), settings.skipFirstValue),
-        ChartProvider.getChart(holeData, true, Option.apply(calculateChartWidth()), settings.skipFirstValue)
+        chartsArea
       )
     }
 

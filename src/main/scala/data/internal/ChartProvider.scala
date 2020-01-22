@@ -2,30 +2,41 @@ package data.internal
 
 import java.nio.file.Path
 
-import data.HoleData
+import data.{HoleData, UiSettings}
 import localizer.Localizer
 import scalafx.scene.{Cursor, Node}
 import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Side
 import scalafx.scene.chart.{LineChart, NumberAxis, ScatterChart, XYChart}
-import scalafx.scene.control.Tooltip
+import scalafx.scene.control.{Label, Tooltip}
 
 object ChartProvider {
-  private val defaultWidth: Int = 1000
+  private val DEFAULT_WIDTH: Int = 1000
 
   private val DEPTH = Localizer.getTranslation("Depth")
   private val VALUE = Localizer.getTranslation("Value")
   private val ADDITIONAL_OPTIONS = Localizer.getTranslation("Additional options")
   private val PENETRATION_RATE_CHART = Localizer.getTranslation("Penetration rate chart")
+}
 
-  def getChart(holeData: HoleData, isAdditional: Boolean, prefWidth: Option[Int], skipFirstValue: Boolean): Node = {
+class ChartProvider(private val holeData: HoleData, private val prefWidth: Option[Int]) {
+
+
+  def getChart(chartType: UiSettings.SelectedChartType.Value): Seq[Node] = {
+    chartType match {
+      case UiSettings.SelectedChartType.SEPARATE => Seq(getSeparatedChart(false, true), getSeparatedChart(true, true))
+      case _ => Seq(new Label("NOT IMPLEMENTED"))
+    }
+  }
+
+  private def getSeparatedChart(isAdditional: Boolean, skipFirstValue: Boolean): Node = {
     val scales = computeScales(holeData, isAdditional)
-    val chart = new LineChart(NumberAxis(DEPTH, scales._1, scales._2, scales._4), NumberAxis(VALUE, scales._1, scales._3, scales._5)) {
+    val chart = new LineChart(NumberAxis(ChartProvider.DEPTH, scales._1, scales._2, scales._4), NumberAxis(ChartProvider.VALUE, scales._1, scales._3, scales._5)) {
       title = getChartName(isAdditional)
       legendSide = Side.Right
       if(!isAdditional) {
         data = ObservableBuffer(
-          xySeries(DEPTH, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq, skipFirstValue))
+          xySeries(ChartProvider.DEPTH, holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)).toSeq, skipFirstValue))
       }
       else {
         val parameters = holeData.stamps(0).additionParameters.keySet
@@ -38,9 +49,9 @@ object ChartProvider {
     }
     chart.getData.forEach(data => data.getData.forEach(innerData => {
       val node = innerData.getNode
-      Tooltip.install(node, new Tooltip(DEPTH + ": " + innerData.getXValue + "\n" + VALUE + ": " + innerData.getYValue))
+      Tooltip.install(node, new Tooltip(ChartProvider.DEPTH + ": " + innerData.getXValue + "\n" + ChartProvider.VALUE + ": " + innerData.getYValue))
     }))
-    chart.setPrefWidth(prefWidth.getOrElse(defaultWidth).toDouble)
+    chart.setPrefWidth(prefWidth.getOrElse(ChartProvider.DEFAULT_WIDTH).toDouble)
     chart.setCursor(Cursor.CROSSHAIR);
     chart.setLegendSide(Side.Bottom)
     chart.setLegendVisible(isAdditional)
@@ -74,8 +85,8 @@ object ChartProvider {
 
   private def getChartName(isAdditional: Boolean): String = {
     isAdditional match {
-      case true => ADDITIONAL_OPTIONS
-      case _ => PENETRATION_RATE_CHART
+      case true => ChartProvider.ADDITIONAL_OPTIONS
+      case _ => ChartProvider.PENETRATION_RATE_CHART
     }
   }
 
