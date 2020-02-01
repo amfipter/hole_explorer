@@ -21,8 +21,10 @@ object ChartExporter {
   private val HOLE_ID = Localizer.getTranslation("Hole ID: ")
 }
 
-class ChartExporter(private val holeData: HoleData, private val settings: UiSettings) {
+class ChartExporter(private val holesData: HolesData, private val settings: UiSettings) {
 
+  //TODO
+  val holeData = holesData.getLastHoleData().get
   val pane = new StackPane()
   lazy val stage = new Stage()
   lazy val scene = new Scene(pane, ChartExporter.SCREEN_SIZE.width, ChartExporter.SCREEN_SIZE.height * 0.8)
@@ -61,7 +63,7 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
       )
     }
 
-    val chartProvider = new ChartProvider(holeData, Option.apply(calculateChartWidth()))
+    val chartProvider = new ChartProvider(holesData, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
     val chartsArea = new VBox() {
       children = chartProvider.getChart(settings.selectedChartType)
     }
@@ -91,5 +93,10 @@ class ChartExporter(private val holeData: HoleData, private val settings: UiSett
   private def calculateChartWidth(): Int = {
     val width = ChartExporter.SCREEN_SIZE.width - 10
     width.toInt
+  }
+
+  private def calculateChartHeight(): Int = {
+    val height = ChartExporter.SCREEN_SIZE.height - 10
+    height.toInt
   }
 }

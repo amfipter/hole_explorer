@@ -81,13 +81,14 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
+  //TODO
   val exportButton = new Button {
     text = MainUI.EXPORT
     onAction = handle {
       holesDataModel.getLastHoleData() match {
         case Some(value) => {
           val file = fileCreator.showSaveDialog(stage)
-          val exporter = new ChartExporter(value, settings)
+          val exporter = new ChartExporter(holesDataModel, settings)
           exporter.`export`(file)
         }
         case None => {
@@ -154,6 +155,7 @@ class MainUI(private val stage: Stage) extends Scene {
       if(settings.selectedChartType != UiSettings.SelectedChartType.SEPARATE) {
         settings.selectedChartType = UiSettings.SelectedChartType.SEPARATE
         redrawCharts()
+        chooseHoleIdVBox.setDisable(false)
       }
     }
   }
@@ -165,6 +167,7 @@ class MainUI(private val stage: Stage) extends Scene {
       if(settings.selectedChartType != UiSettings.SelectedChartType.INTEGRATE) {
         settings.selectedChartType = UiSettings.SelectedChartType.INTEGRATE
         redrawCharts()
+        chooseHoleIdVBox.setDisable(true)
       }
     }
   }
@@ -201,9 +204,10 @@ class MainUI(private val stage: Stage) extends Scene {
   content = mainAreaNode
 
   private def redrawCharts(): Unit = {
+    //TODO
     val chartNode = holesDataModel.getLastHoleData() match {
       case Some(lastHoleData) => {
-        val chartProvider = new ChartProvider(lastHoleData, Option.apply(calculateChartWidth()))
+        val chartProvider = new ChartProvider(holesDataModel, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
         new VBox() {
           padding = Insets(5)
           children = chartProvider.getChart(settings.selectedChartType)
@@ -233,6 +237,7 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
+  //TODO names for integrated charts
   private def updateControlLabels() = {
     holesDataModel.getLastHoleData() match {
       case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
@@ -254,5 +259,9 @@ class MainUI(private val stage: Stage) extends Scene {
 
   private def calculateChartWidth(): Int = {
     currentWidth - controlBox.width.toInt - 20
+  }
+
+  private def calculateChartHeight(): Int = {
+    currentHeight - chartSelectorSection.height.toInt - 20
   }
 }
