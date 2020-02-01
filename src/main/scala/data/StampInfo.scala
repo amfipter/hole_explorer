@@ -10,8 +10,8 @@ class StampInfo(
                  val penetrRate: Double,
                  val additionParameters: Map[String, Double]) {
   assert(time != null)
-  assert(depth != null && depth != Double.NaN)
-  assert(penetrRate != null && penetrRate != Double.NaN)
+  assert(depth != Double.NaN)
+  assert(penetrRate != Double.NaN)
   assert(additionParameters != null)
 
   def getAdditionParameters(): Set[String]={

@@ -10,7 +10,7 @@ class HoleData(
                 val endTime: Option[Date],
                 val parameters: Seq[String],
                 val stamps: Seq[StampInfo]) {
-  assert(id != null && id >= 0)
+  assert(id >= 0)
   assert(veerId != null)
   assert(startTime != null)
   assert(endTime != null)
