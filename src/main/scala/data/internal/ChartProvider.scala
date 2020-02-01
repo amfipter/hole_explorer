@@ -83,7 +83,7 @@ class ChartProvider(private val holesData: HolesData, private val prefWidth: Opt
     }
     chart.getData.forEach(data => data.getData.forEach(innerData => {
       val node = innerData.getNode
-      Tooltip.install(node, new Tooltip(ChartProvider.DEPTH + ": " + innerData.getXValue + "\n" + ChartProvider.VALUE + ": " + innerData.getYValue))
+      Tooltip.install(node, new Tooltip(ChartProvider.DEPTH + innerData.getXValue + "\n" + ChartProvider.VALUE + ": " + innerData.getYValue))
     }))
     chart.setPrefWidth(prefWidth.getOrElse(ChartProvider.DEFAULT_WIDTH).toDouble)
     chart.setCursor(Cursor.CROSSHAIR);

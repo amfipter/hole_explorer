@@ -156,6 +156,7 @@ class MainUI(private val stage: Stage) extends Scene {
         settings.selectedChartType = UiSettings.SelectedChartType.SEPARATE
         redrawCharts()
         chooseHoleIdVBox.setDisable(false)
+        updateControlLabels()
       }
     }
   }
@@ -168,6 +169,7 @@ class MainUI(private val stage: Stage) extends Scene {
         settings.selectedChartType = UiSettings.SelectedChartType.INTEGRATE
         redrawCharts()
         chooseHoleIdVBox.setDisable(true)
+        updateControlLabels()
       }
     }
   }
@@ -239,10 +241,25 @@ class MainUI(private val stage: Stage) extends Scene {
 
   //TODO names for integrated charts
   private def updateControlLabels() = {
-    holesDataModel.getLastHoleData() match {
-      case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
-      case None => Main.stage.setTitle(Main.DEFAULT_NAME)
+    settings.selectedChartType match {
+      case UiSettings.SelectedChartType.SEPARATE => {
+        holesDataModel.getLastHoleData() match {
+          case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
+          case None => Main.stage.setTitle(Main.DEFAULT_NAME)
+        }
+      }
+      case UiSettings.SelectedChartType.INTEGRATE => {
+        val veerNames = holesDataModel.getHolesIds()
+          .map(id => holesDataModel.getHole(id))
+          .filter(holeDataOp => holeDataOp.isDefined)
+          .map(holeDataOp => holeDataOp.get)
+          .map(holeData => holeData.veerId)
+          .toSet
+        Main.stage.setTitle(Main.DEFAULT_NAME + ": [" + veerNames.addString(new StringBuilder, ", ") + "]")
+      }
+      case _ => Main.stage.setTitle(Main.DEFAULT_NAME)
     }
+
   }
 
   private def resetControlsData(): Unit = {
