@@ -31,6 +31,7 @@ object MainUI {
   private val HOLE_ID_SELECTOR = Localizer.getTranslation("Hole ID: ")
   private val CHART_SELECTOR__SEPARATE_VIEW = Localizer.getTranslation("Separated charts")
   private val CHART_SELECTOR__INTEGRATED_VIEW = Localizer.getTranslation("Integrated chart")
+  private val TITLE__INCONSISTENT_DATA = Localizer.getTranslation("ERROR: Inconsistent data")
 }
 
 
@@ -69,14 +70,17 @@ class MainUI(private val stage: Stage) extends Scene {
   val selectFileButton = new Button {
     text = MainUI.SELECT_FILE
     onAction = handle {
-      resetControlsData()
       val selectedFiles = Option.apply(fileChooser.showOpenMultipleDialog(stage))
       selectedFiles match {
         case Some(value) => {
+          holesDataModel.clear()
           value.filter(file => file != null).foreach(file => holesDataModel.addXmlFile(file))
+          settings.selectedHoleId = Option.empty
           fullUpdate()
         }
-        case None => Nil
+        case None => {
+          Nil
+        }
       }
     }
   }
@@ -85,8 +89,8 @@ class MainUI(private val stage: Stage) extends Scene {
   val exportButton = new Button {
     text = MainUI.EXPORT
     onAction = handle {
-      holesDataModel.getLastHoleData() match {
-        case Some(value) => {
+      settings.selectedHoleId match {
+        case Some(holeId) => {
           val file = fileCreator.showSaveDialog(stage)
           val exporter = new ChartExporter(holesDataModel, settings)
           exporter.`export`(file)
@@ -118,7 +122,7 @@ class MainUI(private val stage: Stage) extends Scene {
 
     onAction = handle {
       val id = value.get()
-      holesDataModel.getHole(id)
+      settings.selectedHoleId = Option.apply(id)
       redrawCharts()
       updateControlLabels()
     }
@@ -206,23 +210,12 @@ class MainUI(private val stage: Stage) extends Scene {
   content = mainAreaNode
 
   private def redrawCharts(): Unit = {
-    //TODO
-    val chartNode = holesDataModel.getLastHoleData() match {
-      case Some(lastHoleData) => {
-        val chartProvider = new ChartProvider(holesDataModel, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
-        new VBox() {
-          padding = Insets(5)
-          children = chartProvider.getChart(settings.selectedChartType)
-        }
+    val chartNode = {
+      val chartProvider = new ChartProvider(settings, holesDataModel, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
+      new VBox() {
+        padding = Insets(5)
+        children = chartProvider.getChart()
       }
-        case None => {
-          new VBox {
-            padding = Insets(5)
-            children = Seq(
-              new Label("")
-            )
-          }
-        }
     }
 
     HBox.setHgrow(chartNode, Priority.Always)
@@ -239,31 +232,23 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
-  //TODO names for integrated charts
   private def updateControlLabels() = {
     settings.selectedChartType match {
       case UiSettings.SelectedChartType.SEPARATE => {
-        holesDataModel.getLastHoleData() match {
-          case Some(lastHoleData) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + lastHoleData.veerId)
+        settings.selectedHoleId match {
+          case Some(holeId) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + { holesDataModel.getHole(holeId) match {
+            case Some(hole) => hole.veerId
+            case None => MainUI.TITLE__INCONSISTENT_DATA
+          }})
           case None => Main.stage.setTitle(Main.DEFAULT_NAME)
         }
       }
       case UiSettings.SelectedChartType.INTEGRATE => {
-        val veerNames = holesDataModel.getHolesIds()
-          .map(id => holesDataModel.getHole(id))
-          .filter(holeDataOp => holeDataOp.isDefined)
-          .map(holeDataOp => holeDataOp.get)
-          .map(holeData => holeData.veerId)
-          .toSet
-        Main.stage.setTitle(Main.DEFAULT_NAME + ": [" + veerNames.addString(new StringBuilder, ", ") + "]")
+        Main.stage.setTitle(Main.DEFAULT_NAME + ": " + holesDataModel.collectVeerNames())
       }
       case _ => Main.stage.setTitle(Main.DEFAULT_NAME)
     }
 
-  }
-
-  private def resetControlsData(): Unit = {
-    holesDataModel.clear()
   }
 
   private def fullUpdate(): Unit = {

@@ -11,4 +11,5 @@ object UiSettings {
 class UiSettings {
   var skipFirstValue = true
   var selectedChartType = SelectedChartType.SEPARATE
+  var selectedHoleId: Option[Int] = Option.empty
 }

@@ -13,18 +13,17 @@ import scalafx.scene.control.Label
 import scalafx.scene.image.WritableImage
 import scalafx.scene.layout.{HBox, Pane, Priority, StackPane, VBox}
 import scalafx.stage.{Screen, Stage}
+import util.Logger
 
 object ChartExporter {
   lazy private val SCREEN_SIZE = Screen.primary.bounds
 
   private val VEER_ID = Localizer.getTranslation("Veer ID: ")
   private val HOLE_ID = Localizer.getTranslation("Hole ID: ")
+  private val MESSAGE__INCONSISTENT_DATA = Localizer.getTranslation("ERROR: Inconsistent data")
 }
 
 class ChartExporter(private val holesData: HolesData, private val settings: UiSettings) {
-
-  //TODO
-  val holeData = holesData.getLastHoleData().get
   val pane = new StackPane()
   lazy val stage = new Stage()
   lazy val scene = new Scene(pane, ChartExporter.SCREEN_SIZE.width, ChartExporter.SCREEN_SIZE.height * 0.8)
@@ -55,17 +54,30 @@ class ChartExporter(private val holesData: HolesData, private val settings: UiSe
     scene.getChildren.clear()
 
     val info = new HBox() {
-//      prefWidth = 120
-      children = Seq(
-//        new Label("Info:"),
-        new Label(ChartExporter.VEER_ID + holeData.veerId + "\t\t"),
-        new Label(ChartExporter.HOLE_ID + holeData.id)
-      )
+      children = settings.selectedChartType match {
+        case UiSettings.SelectedChartType.SEPARATE => {
+          Seq(
+            new Label(ChartExporter.VEER_ID + getVeerId() + "\t\t"),
+            new Label(ChartExporter.HOLE_ID + {settings.selectedHoleId match {
+              case Some(id) => id
+              case None => ChartExporter.MESSAGE__INCONSISTENT_DATA
+            }}))
+        }
+        case UiSettings.SelectedChartType.INTEGRATE => {
+          Seq(
+            new Label(ChartExporter.VEER_ID + holesData.collectVeerNames())
+          )
+        }
+        case _ => {
+          Logger.logWithTrace("Unsupported chart type for export operation")
+          Seq()
+        }
+      }
     }
 
-    val chartProvider = new ChartProvider(holesData, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
+    val chartProvider = new ChartProvider(settings, holesData, Option.apply(calculateChartWidth()), Option.apply(calculateChartHeight()))
     val chartsArea = new VBox() {
-      children = chartProvider.getChart(settings.selectedChartType)
+      children = chartProvider.getChart()
     }
 
     val charts = new VBox {
@@ -75,6 +87,8 @@ class ChartExporter(private val holesData: HolesData, private val settings: UiSe
         chartsArea
       )
     }
+
+
 
 //    val hbox = new HBox() {
 //      padding = Insets(5)
@@ -88,6 +102,16 @@ class ChartExporter(private val holesData: HolesData, private val settings: UiSe
 
     scene.getChildren.add(charts)
     charts
+  }
+
+  private def getVeerId(): String = settings.selectedHoleId match {
+    case Some(holeId) => {
+      holesData.getHole(holeId) match {
+        case Some(holeData) => holeData.veerId
+        case None => ChartExporter.MESSAGE__INCONSISTENT_DATA
+      }
+    }
+    case None => ChartExporter.MESSAGE__INCONSISTENT_DATA
   }
 
   private def calculateChartWidth(): Int = {
