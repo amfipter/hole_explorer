@@ -1,14 +1,20 @@
 package data.internal
 
-import java.nio.file.Path
-
+import javafx.{scene => jfxs}
+import javafx.scene.{chart => jfxsc}
 import data.{HoleData, HolesData, UiSettings}
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import localizer.Localizer
+import scalafx.beans.binding.NumberBinding
 import scalafx.scene.{Cursor, Node}
 import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Side
-import scalafx.scene.chart.{LineChart, NumberAxis, ScatterChart, XYChart}
+import scalafx.scene.chart.XYChart.{Data, Series}
+import scalafx.scene.chart.{CategoryAxis, LineChart, NumberAxis, ScatterChart, StackedBarChart, ValueAxis, XYChart}
 import scalafx.scene.control.{Label, Tooltip}
+import util.{ChartUtils, Utils}
+
+import scala.collection.mutable
 
 object ChartProvider {
   private val DEFAULT_WIDTH: Int = 1000
@@ -27,9 +33,48 @@ class ChartProvider(private val uiSettings: UiSettings, private val holesData: H
   def getChart(): Seq[Node] = {
     uiSettings.selectedChartType match {
       case UiSettings.SelectedChartType.SEPARATE => Seq(getSeparatedChart(false, true), getSeparatedChart(true, true))
-      case UiSettings.SelectedChartType.INTEGRATE => Seq(getIntegratedChart())
+      case UiSettings.SelectedChartType.INTEGRATE => Seq(getIntegratedChartProto())
       case _ => Seq(new Label("NOT IMPLEMENTED"))
     }
+  }
+
+  private def getIntegratedChartProto() :Node = {
+    val xAxis = new CategoryAxis();
+    xAxis.setCategories(ObservableBuffer(holesData.getHolesIds().map(id => id.toString)))
+    xAxis.setLabel("x")
+    val yAxis = new NumberAxis()
+    yAxis.setLabel("y")
+    val chart = new StackedBarChart[String, Number](xAxis, yAxis)
+    val colorsMap = new mutable.HashMap[jfxsc.XYChart.Data[String, Number], String]()
+
+    holesData.getHolesIds().filter(id => holesData.getHole(id).isDefined).foreach(id => {
+      val holeData = holesData.getHole(id).get
+      val coloredData = ChartUtils.colorSequence(holeData.stamps.map(stampInfo => (stampInfo.depth, stampInfo.penetrRate)))
+
+      val series1 = new Series[String, Number]()
+      coloredData.foreach(colored => {
+        println((holeData.id.toString, colored))
+        val data = XYChart.Data[String, Number](holeData.id.toString, colored._1._1)
+        colorsMap.put(data, colored._2)
+        series1.getData.add(data)
+      })
+      chart.getData.add(series1)
+    })
+
+    chart.getData.forEach(data => data.getData.forEach(innerData => {
+      val node = innerData.getNode
+      if(node != null) {
+        colorsMap.get(innerData) match {
+          case Some(color) => node.setStyle("-fx-bar-fill:" + color + ";")
+          case None => node.setStyle("-fx-bar-fill: black;")
+        }
+      }
+    }))
+
+    chart.setPrefWidth(prefWidth.getOrElse(ChartProvider.DEFAULT_WIDTH).toDouble)
+    chart.setPrefHeight(prefHeight.getOrElse(ChartProvider.DEFAULT_HEIGHT).toDouble)
+    chart.setLegendVisible(false)
+    chart
   }
 
   private def getIntegratedChart() :Node = {
@@ -142,3 +187,7 @@ class ChartProvider(private val uiSettings: UiSettings, private val holesData: H
       }).map { case (x, y) => XYChart.Data[Number, Number](x, y) })
     )
 }
+
+//class CustomData[T1, T2](val t1: T1, val t2: T2, val color: String) extends jfxsc.XYChart.Data[T1, T2]() {
+//
+//}
