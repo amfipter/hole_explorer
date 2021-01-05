@@ -28,11 +28,8 @@ object ChartUtils {
   //TODO tests
   def colorSequence(seq: Seq[(Double, Double)]): Seq[((Double, Double), String)] = {
     val median = calcMedian(seq.map(pair => pair._2))
-    println("Median: " + median)
     val mapped = seq.map(value => ((value._1, value._2), mapValue(value._2, median)))
-    println(mapped)
     val output = new ArrayBuffer[((Double, Double), String)]()
-//    output.addOne(mapped(0))
 
     var initValue = 0D
     var last = mapped(1)
@@ -57,7 +54,6 @@ object ChartUtils {
       last = current
     }
 
-//    output.map(element => (element._1, element._2)).toSeq
     output.toSeq
   }
 

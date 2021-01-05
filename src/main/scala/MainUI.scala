@@ -19,9 +19,6 @@ import scalafx.stage.FileChooser.ExtensionFilter
 import scala.xml.XML
 
 object MainUI {
-  val width = 1200
-  val height = 900
-
   private val EXPORT__EXPORT_CHARTS = Localizer.getTranslation("Export charts")
   private val EXPORT__ERROR_MESSAGE = Localizer.getTranslation("Nothing to export")
   private val IMPORT__DIALOG_NAME = Localizer.getTranslation("Select xml")
@@ -32,13 +29,20 @@ object MainUI {
   private val CHART_SELECTOR__SEPARATE_VIEW = Localizer.getTranslation("Separated charts")
   private val CHART_SELECTOR__INTEGRATED_VIEW = Localizer.getTranslation("Integrated chart")
   private val TITLE__INCONSISTENT_DATA = Localizer.getTranslation("ERROR: Inconsistent data")
+
+  private val CHECKBOX_TEXT = "Skip\nFirst\nValue"
+  private val UPDATE_CONTROL_SEPARATOR = ": "
+
+  private val PNG_EXTENSION = "png"
+  private val PNG_EXTENSION_FILTER = "*.png"
+  private val XML_EXTENSION_FILTER = "*.xml"
 }
 
 
 class MainUI(private val stage: Stage) extends Scene {
   var charts: Option[Node] = Option.empty
-  private var currentWidth = MainUI.width
-  private var currentHeight = MainUI.height
+  private var currentWidth = Main.DEFAULT_WIDTH
+  private var currentHeight = Main.DEFAULT_HEIGHT
   private val holesDataModel = new HolesData
   private val settings = new UiSettings
 
@@ -56,14 +60,14 @@ class MainUI(private val stage: Stage) extends Scene {
   lazy val fileChooser = new FileChooser {
     title = MainUI.IMPORT__DIALOG_NAME
     extensionFilters.add(
-      new ExtensionFilter(MainUI.IMPORT__TYPE_DESCRIPTION, Seq("*.xml"))
+      new ExtensionFilter(MainUI.IMPORT__TYPE_DESCRIPTION, Seq(MainUI.XML_EXTENSION_FILTER))
     )
   }
 
   lazy val fileCreator = new FileChooser {
     title = MainUI.EXPORT__EXPORT_CHARTS
     extensionFilters.add(
-      new ExtensionFilter("png", Seq("*.png"))
+      new ExtensionFilter(MainUI.PNG_EXTENSION, Seq(MainUI.PNG_EXTENSION_FILTER))
     )
   }
 
@@ -85,7 +89,6 @@ class MainUI(private val stage: Stage) extends Scene {
     }
   }
 
-  //TODO
   val exportButton = new Button {
     text = MainUI.EXPORT
     onAction = handle {
@@ -105,7 +108,7 @@ class MainUI(private val stage: Stage) extends Scene {
 
   //TODO remove
   val skipFirstValueCheckbox = new CheckBox {
-    text = "Skip\nFirst\nValue"
+    text = MainUI.CHECKBOX_TEXT
     selected = settings.skipFirstValue
     onAction = handle {
       settings.skipFirstValue = !settings.skipFirstValue
@@ -140,15 +143,12 @@ class MainUI(private val stage: Stage) extends Scene {
   }
 
   val controlBox = new VBox() {
-//    padding = Insets(5)
     spacing = 5
     prefWidth = 120
     children = Seq(
       selectFileButton,
       exportButton,
-//      skipFirstValueCheckbox,
       chooseHoleIdVBox
-//      infoControl
     )
   }
 
@@ -202,10 +202,6 @@ class MainUI(private val stage: Stage) extends Scene {
     )
   }
   HBox.setHgrow(mainAreaNode, Priority.Always)
-//  hbox.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
-//    + "-fx-border-width: 2;" + "-fx-border-insets: 5;"
-//    + "-fx-border-radius: 5;" + "-fx-border-color: blue;");
-
   fill = White
   content = mainAreaNode
 
@@ -236,7 +232,7 @@ class MainUI(private val stage: Stage) extends Scene {
     settings.selectedChartType match {
       case UiSettings.SelectedChartType.SEPARATE => {
         settings.selectedHoleId match {
-          case Some(holeId) => Main.stage.setTitle(Main.DEFAULT_NAME + ": " + { holesDataModel.getHole(holeId) match {
+          case Some(holeId) => Main.stage.setTitle(Main.DEFAULT_NAME + MainUI.UPDATE_CONTROL_SEPARATOR + { holesDataModel.getHole(holeId) match {
             case Some(hole) => hole.veerId
             case None => MainUI.TITLE__INCONSISTENT_DATA
           }})

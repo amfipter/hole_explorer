@@ -2,13 +2,13 @@ package `export`
 
 import java.io.File
 
-import data.{HoleData, HolesData, UiSettings}
+import data.{HolesData, UiSettings}
 import data.internal.ChartProvider
 import javax.imageio.ImageIO
 import localizer.Localizer
 import scalafx.embed.swing.SwingFXUtils
 import scalafx.geometry.Insets
-import scalafx.scene.{Node, Scene}
+import scalafx.scene.{Scene}
 import scalafx.scene.control.Label
 import scalafx.scene.image.WritableImage
 import scalafx.scene.layout.{HBox, Pane, Priority, StackPane, VBox}
@@ -29,7 +29,6 @@ class ChartExporter(private val holesData: HolesData, private val settings: UiSe
   lazy val scene = new Scene(pane, ChartExporter.SCREEN_SIZE.width, ChartExporter.SCREEN_SIZE.height * 0.8)
 
   stage.scene = scene
-//  stage.show()
   val node = redraw()
 
   def export(file_ :File): Unit = {
@@ -88,16 +87,6 @@ class ChartExporter(private val holesData: HolesData, private val settings: UiSe
       )
     }
 
-
-
-//    val hbox = new HBox() {
-//      padding = Insets(5)
-//      fillHeight = true
-//      children = Seq(
-//        info,
-//        charts
-//      )
-//    }
     HBox.setHgrow(info, Priority.Always)
 
     scene.getChildren.add(charts)

@@ -1,18 +1,15 @@
 package data.internal
 
-import javafx.{scene => jfxs}
 import javafx.scene.{chart => jfxsc}
 import data.{HoleData, HolesData, UiSettings}
-import javafx.beans.value.{ChangeListener, ObservableValue}
 import localizer.Localizer
-import scalafx.beans.binding.NumberBinding
 import scalafx.scene.{Cursor, Node}
 import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Side
-import scalafx.scene.chart.XYChart.{Data, Series}
-import scalafx.scene.chart.{CategoryAxis, LineChart, NumberAxis, ScatterChart, StackedBarChart, ValueAxis, XYChart}
+import scalafx.scene.chart.XYChart.{Series}
+import scalafx.scene.chart.{CategoryAxis, LineChart, NumberAxis, StackedBarChart, XYChart}
 import scalafx.scene.control.{Label, Tooltip}
-import util.{ChartUtils, Utils}
+import util.{ChartUtils}
 
 import scala.collection.mutable
 
@@ -187,7 +184,3 @@ class ChartProvider(private val uiSettings: UiSettings, private val holesData: H
       }).map { case (x, y) => XYChart.Data[Number, Number](x, y) })
     )
 }
-
-//class CustomData[T1, T2](val t1: T1, val t2: T2, val color: String) extends jfxsc.XYChart.Data[T1, T2]() {
-//
-//}

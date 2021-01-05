@@ -52,11 +52,6 @@ class HoleDataParser(private val file: File) {
   }
 
   private def parseVeerId(node: Node): Unit = {
-    //TODO Remove
-//    Utils.convertVeerId(node.text) match {
-//      case Some(value) => holeDataBuilder.setVeerId(value)
-//      case None => Logger.log("Can't parse veer id: " + node.text)
-//    }
     holeDataBuilder.setVeerId(node.text)
   }
 
@@ -113,8 +108,6 @@ class HoleDataParser(private val file: File) {
           for(i <- Range.apply(dataAlign, values.length)) {
             builder.setAdditionParameter(holeDataBuilder.parameters(i - dataAlign), values(i))
           }
-
-//          println(values(0))
         }
         case _ => Nil
       }

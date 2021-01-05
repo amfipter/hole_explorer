@@ -1,7 +1,5 @@
 package util
 
-import java.util.Date
-
 object Logger {
   def log(message: String): Unit = {
     logPrint(message + "\n")

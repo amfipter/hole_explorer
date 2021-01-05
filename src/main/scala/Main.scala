@@ -11,10 +11,13 @@ import scalafx.scene.shape.Rectangle
 
 object Main extends JFXApp {
   val DEFAULT_NAME = "Hole Explorer"
+  val DEFAULT_WIDTH = 1200
+  val DEFAULT_HEIGHT = 900
+
   stage = new JFXApp.PrimaryStage {
     title.value = DEFAULT_NAME
-    width = 1200
-    height = 900
+    width = DEFAULT_WIDTH
+    height = DEFAULT_HEIGHT
     scene = new MainUI(stage)
   }
 }
